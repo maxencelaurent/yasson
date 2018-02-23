@@ -88,7 +88,7 @@ class ClassParser {
         parseClassAndInterfaceMethods(classElement, classProperties);
 
         // remove useless fields (transient, static, private, ...)
-        //classProperties.entrySet().removeIf(entry -> shouldRemoveField(entry.getValue()));
+        classProperties.entrySet().removeIf(entry -> shouldRemoveField(entry.getValue()));
 
         //add sorted properties from parent, if they are not overridden in current class
         final List<PropertyModel> sortedProperties = getSortedParentProperties(classModel, classElement, classProperties);
