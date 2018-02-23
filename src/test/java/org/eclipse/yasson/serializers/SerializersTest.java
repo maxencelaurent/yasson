@@ -1,4 +1,4 @@
-/*******************************************************************************
+/** *****************************************************************************
  * Copyright (c) 2016, 2017 Oracle and/or its affiliates. All rights reserved.
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
@@ -9,25 +9,21 @@
  *
  * Contributors:
  * Roman Grigoriadi
- ******************************************************************************/
-
+ ***************************************************************************** */
 package org.eclipse.yasson.serializers;
 
-import org.eclipse.yasson.serializers.model.*;
-import org.junit.Assert;
-import org.junit.Test;
-
-import javax.json.JsonBuilderFactory;
-import javax.json.bind.Jsonb;
-import javax.json.bind.JsonbBuilder;
-import javax.json.bind.JsonbConfig;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
-
+import javax.json.bind.Jsonb;
+import javax.json.bind.JsonbBuilder;
+import javax.json.bind.JsonbConfig;
+import org.eclipse.yasson.serializers.model.*;
+import org.junit.Assert;
 import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  * @author Roman Grigoriadi
@@ -228,7 +224,7 @@ public class SerializersTest {
         instance1.setInstance("Test String 1");
         SimpleContainer instance2 = new SimpleContainer();
         instance2.setInstance("Test String 2");
-        container.setArrayInstance(new SimpleContainer[] {instance1, instance2});
+        container.setArrayInstance(new SimpleContainer[]{instance1, instance2});
 
         container.setListInstance(new ArrayList<>());
         container.getListInstance().add(new SimpleContainer("Test List 1"));
@@ -289,7 +285,6 @@ public class SerializersTest {
         box.crate = new Crate();
         box.secondBoxStr = "Second box string";
 
-
         box.crate.crateInner = createCrateInner("Single inner");
 
         box.crate.crateInnerList = new ArrayList<>();
@@ -305,6 +300,5 @@ public class SerializersTest {
         crateInner.crateInnerBigDec = BigDecimal.TEN;
         return crateInner;
     }
-
 
 }

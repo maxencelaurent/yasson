@@ -1,4 +1,4 @@
-/*******************************************************************************
+/** *****************************************************************************
  * Copyright (c) 2015, 2017 Oracle and/or its affiliates. All rights reserved.
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
@@ -9,25 +9,25 @@
  *
  * Contributors:
  *     Dmitry Kornilov - initial implementation
- ******************************************************************************/
+ ***************************************************************************** */
 package org.eclipse.yasson.internal;
 
-import org.eclipse.yasson.internal.model.*;
-import org.eclipse.yasson.internal.properties.MessageKeys;
-import org.eclipse.yasson.internal.properties.Messages;
-import org.eclipse.yasson.internal.model.customization.CreatorCustomization;
-
-import javax.json.bind.JsonbException;
 import java.beans.Introspector;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.json.bind.JsonbException;
+import org.eclipse.yasson.internal.model.*;
+import org.eclipse.yasson.internal.model.customization.CreatorCustomization;
+import org.eclipse.yasson.internal.properties.MessageKeys;
+import org.eclipse.yasson.internal.properties.Messages;
 
 /**
  * Created a class internal model.
@@ -49,6 +49,36 @@ class ClassParser {
     }
 
     /**
+     * true if the getter or the setter is public
+     */
+    private boolean isAnyMethodPublic(Property property) {
+        Method getter = property.getGetter();
+        Method setter = property.getSetter();
+        return getter != null && Modifier.isPublic(getter.getModifiers())
+                || setter != null && Modifier.isPublic(setter.getModifiers());
+    }
+
+    /**
+     * should the given property being completely removed ?
+     */
+    private boolean shouldRemoveField(Property property) {
+        Field f = property.getField();
+
+        if (f != null) {
+            // field exists
+            int mod = f.getModifiers();
+
+            return Modifier.isStatic(mod) || Modifier.isTransient(mod) // remove static and transient fields in all case
+                    || !(isAnyMethodPublic(property) // but keep field with public getter or setter
+                    || (Modifier.isPublic(mod) //  or public fields without getter setter
+                    && property.getGetter() == null
+                    && property.getSetter() == null));
+        }
+
+        return false;
+    }
+
+    /**
      * Parse class fields and getters setters. Merge to java bean like properties.
      */
     public void parseProperties(ClassModel classModel, JsonbAnnotatedElement<Class<?>> classElement) {
@@ -56,6 +86,9 @@ class ClassParser {
         final Map<String, Property> classProperties = new HashMap<>();
         parseFields(classElement, classProperties);
         parseClassAndInterfaceMethods(classElement, classProperties);
+
+        // remove useless fields (transient, static, private, ...)
+        //classProperties.entrySet().removeIf(entry -> shouldRemoveField(entry.getValue()));
 
         //add sorted properties from parent, if they are not overridden in current class
         final List<PropertyModel> sortedProperties = getSortedParentProperties(classModel, classElement, classProperties);
@@ -90,7 +123,7 @@ class ClassParser {
 
     private void parseIfaceMethodAnnotations(Class<?> ifc, Map<String, Property> classProperties) {
         Method[] declaredMethods = AccessController.doPrivileged((PrivilegedAction<Method[]>) ifc::getDeclaredMethods);
-        for(Method method : declaredMethods) {
+        for (Method method : declaredMethods) {
             final String methodName = method.getName();
             if (!isPropertyMethod(method)) {
                 continue;
@@ -144,7 +177,7 @@ class ClassParser {
     }
 
     private boolean isPropertyMethod(Method m) {
-    	return isGetter(m) || isSetter(m);
+        return isGetter(m) || isSetter(m);
     }
 
     private void parseFields(JsonbAnnotatedElement<Class<?>> classElement, Map<String, Property> classProperties) {
@@ -167,8 +200,8 @@ class ClassParser {
             for (PropertyModel checkedPropertyModel : checkedProperties) {
 
                 if ((checkedPropertyModel.getReadName().equals(collectedPropertyModel.getReadName())
-                && checkedPropertyModel.isReadable() && collectedPropertyModel.isReadable()) ||
-                        (checkedPropertyModel.getWriteName().equals(collectedPropertyModel.getWriteName()))
+                        && checkedPropertyModel.isReadable() && collectedPropertyModel.isReadable())
+                        || (checkedPropertyModel.getWriteName().equals(collectedPropertyModel.getWriteName()))
                         && checkedPropertyModel.isWritable() && collectedPropertyModel.isWritable()) {
                     throw new JsonbException(Messages.getMessage(MessageKeys.PROPERTY_NAME_CLASH,
                             checkedPropertyModel.getPropertyName(), collectedPropertyModel.getPropertyName(),
@@ -183,13 +216,13 @@ class ClassParser {
      * Merges current class properties with parent class properties.
      * If javabean property is declared in more than one inheritance levels,
      * merge field, getters and setters of that property.
-     *
+     * <p>
      * For example BaseClass contains field foo and getter getFoo. In BaseExtensions there is a setter setFoo.
      * All three will be merged for BaseExtension.
-     *
+     * <p>
      * Such property is sorted based on where its getter or field is located.
      */
-    private  List<PropertyModel> getSortedParentProperties(ClassModel classModel, JsonbAnnotatedElement<Class<?>> classElement, Map<String, Property> classProperties) {
+    private List<PropertyModel> getSortedParentProperties(ClassModel classModel, JsonbAnnotatedElement<Class<?>> classElement, Map<String, Property> classProperties) {
         List<PropertyModel> sortedProperties = new ArrayList<>();
         //Pull properties from parent
         if (classModel.getParentClassModel() != null) {

@@ -13,17 +13,15 @@
 
 package org.eclipse.yasson.customization;
 
-import org.junit.Test;
-
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import javax.json.bind.Jsonb;
 import javax.json.bind.JsonbBuilder;
 import javax.json.bind.JsonbConfig;
 import javax.json.bind.annotation.JsonbVisibility;
 import javax.json.bind.config.PropertyVisibilityStrategy;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-
 import static org.junit.Assert.assertEquals;
+import org.junit.Test;
 
 /**
  * Tests custom {@link PropertyVisibilityStrategy}
@@ -128,7 +126,7 @@ public class JsonbPropertyVisibilityStrategyTest {
         FieldPojo fieldPojo = new FieldPojo("avalue", "bvalue", "cvalue", "dvalue");
 
         Jsonb jsonb = JsonbBuilder.create(customizedConfig);
-        assertEquals("{\"afield\":\"avalue\",\"dfield\":\"dvalue\"}", jsonb.toJson(fieldPojo));
+        assertEquals("{\"dfield\":\"dvalue\"}", jsonb.toJson(fieldPojo));
     }
 
     /**
@@ -158,8 +156,11 @@ public class JsonbPropertyVisibilityStrategyTest {
 
     @Test
     public void testAnnotatedPojo() {
+
         final Jsonb jsonb = JsonbBuilder.create();
         AnnotatedPojo fieldPojo = new AnnotatedPojo("avalue", "bvalue", "cvalue", "dvalue");
-        assertEquals("{\"bfield\":\"bvalue\",\"bgetter\":\"bvalue\",\"cfield\":\"cvalue\",\"cgetter\":\"cvalue\"}", jsonb.toJson(fieldPojo));
+        //assertEquals("{\"bfield\":\"bvalue\",\"bgetter\":\"bvalue\",\"cfield\":\"cvalue\",\"cgetter\":\"cvalue\"}", jsonb.toJson(fieldPojo));
+
+        assertEquals("{\"bgetter\":\"bvalue\",\"cfield\":\"cvalue\",\"cgetter\":\"cvalue\"}", jsonb.toJson(fieldPojo));
     }
 }

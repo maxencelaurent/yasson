@@ -1,4 +1,4 @@
-/*******************************************************************************
+/** *****************************************************************************
  * Copyright (c) 2016 Oracle and/or its affiliates. All rights reserved.
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v1.0 and Eclipse Distribution License v. 1.0
@@ -9,20 +9,8 @@
  *
  * Contributors:
  * Roman Grigoriadi
- ******************************************************************************/
-
+ ***************************************************************************** */
 package org.eclipse.yasson.customization.transients;
-
-import org.eclipse.yasson.customization.transients.models.*;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-
-import javax.json.bind.Jsonb;
-import javax.json.bind.JsonbBuilder;
-import javax.json.bind.JsonbException;
-
-import static org.junit.Assert.*;
 
 /**
  * @author Roman Grigoriadi
@@ -170,4 +158,5 @@ public class JsonbTransientTest {
         String result = jsonb.toJson(pojo);
         Assert.assertEquals("{\"instance\":\"INSTANCE\"}", result);
     }
+
 }
